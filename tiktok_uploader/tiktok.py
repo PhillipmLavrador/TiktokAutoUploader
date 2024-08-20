@@ -45,14 +45,14 @@ def login(login_name: str):
 	return cookie_name.get('value', '') if cookie_name else ''
 
 
-def upload_video(session_user, video, title, schedule_time=0, allow_comment=1, allow_duet=0, allow_stitch=0, visibility_type=0, brand_organic_type=0, branded_content_type=0, ai_label=0, proxy=None):
+def upload_video(session_user, video, title, cookies_directory, schedule_time=0, allow_comment=1, allow_duet=0, allow_stitch=0, visibility_type=0, brand_organic_type=0, branded_content_type=0, ai_label=0, proxy=None):
 	try:
 		user_agent = UserAgent().random
 	except FakeUserAgentError as e:
 		user_agent = _UA
 		print("[-] Could not get random user agent, using default")
 
-	cookies = load_cookies_from_file(f"tiktok_session-{session_user}")
+	cookies = load_cookies_from_file(f"tiktok_session-{session_user}", cookies_path=cookies_directory)
 	session_id = next((c["value"] for c in cookies if c["name"] == 'sessionid'), None)
 	dc_id = next((c["value"] for c in cookies if c["name"] == 'tt-target-idc'), None)
 	
@@ -189,6 +189,7 @@ def upload_video(session_user, video, title, schedule_time=0, allow_comment=1, a
 		mstoken = session.cookies.get("msToken")
 		# xbogus = subprocess_jsvmp(os.path.join(os.getcwd(), "tiktok_uploader", "./x-bogus.js"), user_agent, f"app_name=tiktok_web&channel=tiktok_web&device_platform=web&aid=1988&msToken={mstoken}")
 		signatures = subprocess_jsvmp(os.path.join(os.getcwd(), "tiktok_uploader", "tiktok-signature", "browser.js"), user_agent, f"https://www.tiktok.com/api/v1/web/project/post/?app_name=tiktok_web&channel=tiktok_web&device_platform=web&aid=1988&msToken={mstoken}")
+		print(type(signatures))
 		tt_output = json.loads(signatures)["data"]
 		project_post_dict = {
 			"app_name": "tiktok_web",
@@ -245,7 +246,10 @@ def upload_to_tiktok(video_file, session):
 		aws_secret_access_key=r.json()["video_token_v5"]["secret_acess_key"],
 		aws_session_token=r.json()["video_token_v5"]["session_token"],
 	)
+
+	# Change here for path
 	with open(os.path.join(os.getcwd(), Config.get().videos_dir, video_file), "rb") as f:
+	# with open(video_file, "rb") as f:
 		video_content = f.read()
 	file_size = len(video_content)
 	url = f"https://www.tiktok.com/top/v1?Action=ApplyUploadInner&Version=2020-11-19&SpaceName=tiktok&FileType=video&IsInner=1&FileSize={file_size}&s=g158iqx8434"

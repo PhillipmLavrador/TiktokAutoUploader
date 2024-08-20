@@ -56,8 +56,8 @@ class Browser:
             self._driver.add_cookie(cookie)
         self._driver.refresh()
 
-    def save_cookies(self, filename: str, cookies:list=None):
-        save_cookies_to_file(cookies, filename)
+    def save_cookies(self, filename: str, cookies_path, cookies:list=None):
+        save_cookies_to_file(cookies, filename, cookies_path=cookies_path)
 
 
 if __name__ == "__main__":
